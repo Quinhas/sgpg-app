@@ -1,7 +1,5 @@
 import { useColorMode } from "@chakra-ui/color-mode";
-import {
-  Flex, Heading
-} from "@chakra-ui/layout";
+import { Flex, Heading } from "@chakra-ui/layout";
 import MenuAside from "@components/MenuAside";
 import { GetStaticProps } from "next";
 import React from "react";
@@ -15,7 +13,7 @@ export default function StudentsPage() {
     <Flex direction={"row"}>
       <MenuAside />
       <Flex p={"3.125rem"} grow={1} w={"100%"} direction={"column"}>
-        <Heading fontSize={"3rem"}>Estudantes 🎓</Heading>
+        <Heading fontSize={"3rem"}>🎓 Estudantes</Heading>
       </Flex>
     </Flex>
   );

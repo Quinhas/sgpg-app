@@ -8,10 +8,6 @@ class MyDocument extends Document {
     return (
       <Html>
         <Head>
-          <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"
-          />
           <link rel="preconnect" href="https://fonts.googleapis.com"></link>
           <link rel="preconnect" href="https://fonts.gstatic.com"></link>
           <link rel="shortcut icon" href="/favicon.svg" type="image/x-icon" />

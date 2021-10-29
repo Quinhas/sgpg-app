@@ -8,7 +8,7 @@ import {
   Text
 } from "@chakra-ui/layout";
 import MenuAside from "@components/MenuAside";
-import { api } from "@services/api";
+import api from "@services/api";
 import checkPlural from "@utils/checkPlural";
 import { GetStaticProps } from "next";
 import NextLink from "next/link";
@@ -111,17 +111,17 @@ export default function Home({ numberOf }: HomeProps) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const instruments = (await api.get<{ data: any[] }>("/instruments")).data;
-  const employees = (await api.get<{ data: any[] }>("/employees")).data;
-  const classes = (await api.get<{ data: any[] }>("/classes")).data;
+  // const instruments = (await api.get<{ data: any[] }>("/instruments")).data;
+  const employees = await api.getAllEmployees();
+  // const classes = (await api.get<{ data: any[] }>("/classes")).data;
 
   return {
     props: {
       numberOf: {
         students: 200,
-        instruments: instruments.data.length,
-        employees: employees.data.length,
-        classes: classes.data.length,
+        instruments: 2,
+        employees: employees.length,
+        classes: 2,
       },
     },
     revalidate: 60 * 60 * 24, // 24 hours
