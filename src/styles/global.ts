@@ -7,6 +7,10 @@ const theme = extendTheme({
   components: {
     MenuItem: {
       baseStyle: (props: Dict<any>) => ({
+        "&:first-of-type": {
+          borderTop: "1px solid",
+          borderTopColor: "light",
+        },
         display: "flex",
         alignItems: "center",
         height: "3.5rem",
@@ -32,6 +36,8 @@ const theme = extendTheme({
         a: {
           transition: "0.2s ease",
         },
+        borderBottom: "1px solid",
+        borderBottomColor: "light",
       }),
       variants: {
         active: (props: Dict<any> | StyleFunctionProps) => ({
@@ -102,16 +108,16 @@ const theme = extendTheme({
       900: "#08152B",
     },
     complementaryApp: {
-      50: "#FFF6E5",
-      100: "#FFE5B8",
-      200: "#FFD48A",
-      300: "#FFC35C",
-      400: "#FFB32E",
-      500: "#FFA200",
-      600: "#CC8200",
-      700: "#996100",
-      800: "#664100",
-      900: "#332000",
+      50: "#FBF5E9",
+      100: "#F4E4C2",
+      200: "#EDD29B",
+      300: "#E7C174",
+      400: "#E0AF4D",
+      500: "#D99E26",
+      600: "#AD7E1F",
+      700: "#825F17",
+      800: "#573F0F",
+      900: "#2B2008",
     },
     success: {
       50: "#EAFAEE",

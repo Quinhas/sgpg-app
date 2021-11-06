@@ -14,20 +14,19 @@ import {
 } from "@chakra-ui/react";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
 import MenuAside from "@components/MenuAside";
-import { ModalStudent } from "@components/ModalStudent";
+import { ModalInstrument } from "@components/ModalInstrument";
 import api from "@services/api";
-import formatPhone from "@utils/formatPhone";
 import { SGPGApplicationException } from "@utils/SGPGApplicationException";
 import { GetStaticProps } from "next";
 import React, { useState } from "react";
 import { FaPencilAlt, FaPlus, FaRegTrashAlt } from "react-icons/fa";
-import { Student, StudentDTO } from "src/types/student.interface";
+import { Instrument, InstrumentDTO } from "src/types/instrument.interface";
 
-interface StudentsPageProps {
-  _students: Student[];
+interface InstrumentPageProps {
+  _instruments: Instrument[];
 }
 
-export default function StudentsPage({ _students }: StudentsPageProps) {
+export default function InstrumentsPage({ _instruments }: InstrumentPageProps) {
   const { colorMode } = useColorMode();
   const {
     isOpen: isOpenModal,
@@ -41,35 +40,36 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
   } = useDisclosure();
   const cancelRef = React.useRef(null);
   const toast = useToast();
-  const [students, setStudents] = useState<Student[]>(_students ?? []);
-  const [selectedStudent, setSelectedStudent] = useState<Student>();
+  const [instruments, setInstruments] = useState<Instrument[]>(
+    _instruments ?? []
+  );
+  const [selectedInstrument, setSelectedInstrument] = useState<Instrument>();
   const [isDeletingInstrument, setIsDeletingInstrument] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
-  const updateStudentsList = async () => {
-    const _students = await api.students.getAll();
-    setStudents(_students);
+  const updateInstrumentList = async () => {
+    const _instruments = await api.instruments.getAll();
+    setInstruments(_instruments);
   };
 
   const handleDelete = async () => {
     setIsDeletingInstrument(true);
     try {
-      if (!selectedStudent) {
-        throw new SGPGApplicationException("Não há estudante selecionado.");
+      if (!selectedInstrument) {
+        throw new SGPGApplicationException("Não há instrumento selecionado.");
       }
-      const updatedStudent: Partial<StudentDTO> = {
-        student_addr: selectedStudent.student_addr,
-        student_cpf: selectedStudent.student_cpf,
-        student_email: selectedStudent.student_email,
-        student_name: selectedStudent.student_name,
-        student_phone: selectedStudent.student_phone,
-        student_responsible: selectedStudent.student_responsible,
-        student_rg: selectedStudent.student_rg,
-        student_scholarship: selectedStudent.student_scholarship,
-        created_by: selectedStudent.created_by,
+      const updatedInstrument: Partial<InstrumentDTO> = {
+        instrument_model: selectedInstrument.instrument_model,
+        instrument_brand: selectedInstrument.instrument_brand,
+        instrument_student: selectedInstrument.instrument_student,
+        instrument_type: selectedInstrument.instrument_type,
+        created_by: selectedInstrument.created_by,
         is_deleted: true,
       };
-      await api.students.update(selectedStudent.student_id, updatedStudent);
+      await api.instruments.update(
+        selectedInstrument.instrument_id,
+        updatedInstrument
+      );
       toast({
         title: "Eba!",
         description: "Instrumento excluído com sucesso.",
@@ -78,7 +78,7 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
         status: "success",
         duration: 3000,
       });
-      await updateStudentsList();
+      await updateInstrumentList();
       onCloseConfirmDelete();
       setIsDeletingInstrument(false);
     } catch (error) {
@@ -108,17 +108,17 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
           gridGap={"1.25rem"}
         >
           <Flex align={"center"} justify={"space-between"}>
-            <Heading fontSize={"3rem"}>Alunos</Heading>
+            <Heading fontSize={"3rem"}>Instrumentos</Heading>
             <Button
               colorScheme={"complementaryApp"}
               leftIcon={<FaPlus />}
               onClick={() => {
                 setIsEdit(false);
-                setSelectedStudent(undefined);
+                setSelectedInstrument(undefined);
                 onOpenModal();
               }}
             >
-              Novo Aluno
+              Novo Instrumento
             </Button>
           </Flex>
 
@@ -135,28 +135,28 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
               <Thead>
                 <Tr>
                   <Th isNumeric>ID</Th>
-                  <Th>Nome</Th>
-                  {/* <Th>Responsável</Th> */}
-                  <Th>Telefone</Th>
-                  <Th>CPF</Th>
+                  <Th>Modelo</Th>
+                  <Th>Tipo</Th>
+                  <Th>Marca</Th>
+                  {/* <Th>Emprestado</Th> */}
                   <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {students.map((student) => (
+                {instruments.map((instrument) => (
                   <Tr
-                    key={student.student_id}
+                    key={instrument.instrument_id}
                     _hover={{ backgroundColor: "blackAlpha.200" }}
                   >
-                    <Td isNumeric>{student.student_id}</Td>
-                    <Td>{student.student_name}</Td>
-                    {/* <Td>{student.student_responsible ?? "-"}</Td> */}
+                    <Td isNumeric>{instrument.instrument_id}</Td>
+                    <Td>{instrument.instrument_model}</Td>
                     <Td>
-                      {student.student_phone
-                        ? formatPhone(student.student_phone)
-                        : "-"}
+                      {instrument.instrumenttype?.instrumenttype_name ?? "-"}
                     </Td>
-                    <Td>{student.student_cpf}</Td>
+                    <Td>
+                      {instrument.instrumentbrand?.instrumentbrand_name ?? "-"}
+                    </Td>
+                    {/* <Td>{instrument.instrument_student ?? "-"}</Td> */}
                     <Td p={0}>
                       <Flex gridGap={"0.5rem"}>
                         <IconButton
@@ -167,7 +167,7 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
                           variant={"ghost"}
                           onClick={() => {
                             setIsEdit(true);
-                            setSelectedStudent(student);
+                            setSelectedInstrument(instrument);
                             onOpenModal();
                           }}
                         />
@@ -179,7 +179,7 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
                           variant={"ghost"}
                           onClick={() => {
                             onOpenConfirmDelete();
-                            setSelectedStudent(student);
+                            setSelectedInstrument(instrument);
                           }}
                         />
                       </Flex>
@@ -191,18 +191,18 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
           </Box>
         </Flex>
       </Flex>
-      <ModalStudent
+      <ModalInstrument
         isOpen={isOpenModal}
         onClose={async (update: boolean = false) => {
           onCloseModal();
           if (update) {
-            await updateStudentsList();
+            await updateInstrumentList();
           }
         }}
         isEdit={isEdit}
-        data={selectedStudent}
+        data={selectedInstrument}
       />
-      {selectedStudent && (
+      {selectedInstrument && (
         <>
           <AlertDialog
             isOpen={isOpenConfirmDelete}
@@ -216,13 +216,13 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
                 </AlertDialogHeader>
 
                 <AlertDialogBody>
-                  Você realmente deseja excluir o aluno{" "}
+                  Você realmente deseja excluir o instrumento{" "}
                   <Text as={"span"} fontWeight={"semibold"}>
-                    {selectedStudent.student_name}
+                    {selectedInstrument.instrument_model}
                   </Text>{" "}
                   de ID{" "}
                   <Text as={"span"} fontWeight={"semibold"}>
-                    {selectedStudent.student_id}
+                    {selectedInstrument.instrument_id}
                   </Text>
                   ?
                 </AlertDialogBody>
@@ -245,11 +245,11 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const students = await api.students.getAll();
+  const instruments = await api.instruments.getAll();
 
   return {
     props: {
-      _students: students,
+      _instruments: instruments,
     },
     revalidate: 60 * 60 * 24, // 24 hours
   };

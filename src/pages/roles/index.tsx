@@ -14,20 +14,19 @@ import {
 } from "@chakra-ui/react";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
 import MenuAside from "@components/MenuAside";
-import { ModalStudent } from "@components/ModalStudent";
+import { ModalRole } from "@components/ModalRole";
 import api from "@services/api";
-import formatPhone from "@utils/formatPhone";
 import { SGPGApplicationException } from "@utils/SGPGApplicationException";
 import { GetStaticProps } from "next";
 import React, { useState } from "react";
 import { FaPencilAlt, FaPlus, FaRegTrashAlt } from "react-icons/fa";
-import { Student, StudentDTO } from "src/types/student.interface";
+import { Role, RoleDTO } from "src/types/role.interface";
 
-interface StudentsPageProps {
-  _students: Student[];
+interface RolesPageProps {
+  _roles: Role[];
 }
 
-export default function StudentsPage({ _students }: StudentsPageProps) {
+export default function RolesPage({ _roles }: RolesPageProps) {
   const { colorMode } = useColorMode();
   const {
     isOpen: isOpenModal,
@@ -41,48 +40,42 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
   } = useDisclosure();
   const cancelRef = React.useRef(null);
   const toast = useToast();
-  const [students, setStudents] = useState<Student[]>(_students ?? []);
-  const [selectedStudent, setSelectedStudent] = useState<Student>();
-  const [isDeletingInstrument, setIsDeletingInstrument] = useState(false);
+  const [roles, setRoles] = useState<Role[]>(_roles ?? []);
+  const [selectedRole, setSelectedRole] = useState<Role>();
+  const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
-  const updateStudentsList = async () => {
-    const _students = await api.students.getAll();
-    setStudents(_students);
+  const updateRoleList = async () => {
+    const _roles = await api.roles.getAll();
+    setRoles(_roles);
   };
 
   const handleDelete = async () => {
-    setIsDeletingInstrument(true);
+    setIsDeletingEmployee(true);
     try {
-      if (!selectedStudent) {
-        throw new SGPGApplicationException("Não há estudante selecionado.");
+      if (!selectedRole) {
+        throw new SGPGApplicationException("Não há funcionário selecionado.");
       }
-      const updatedStudent: Partial<StudentDTO> = {
-        student_addr: selectedStudent.student_addr,
-        student_cpf: selectedStudent.student_cpf,
-        student_email: selectedStudent.student_email,
-        student_name: selectedStudent.student_name,
-        student_phone: selectedStudent.student_phone,
-        student_responsible: selectedStudent.student_responsible,
-        student_rg: selectedStudent.student_rg,
-        student_scholarship: selectedStudent.student_scholarship,
-        created_by: selectedStudent.created_by,
+      const updatedRole: Partial<RoleDTO> = {
+        role_desc: selectedRole.role_desc,
+        role_title: selectedRole.role_title,
+        created_by: selectedRole.created_by,
         is_deleted: true,
       };
-      await api.students.update(selectedStudent.student_id, updatedStudent);
+      await api.roles.update(selectedRole.role_id, updatedRole);
       toast({
         title: "Eba!",
-        description: "Instrumento excluído com sucesso.",
+        description: "Cargo excluído com sucesso.",
         isClosable: true,
         position: "top-end",
         status: "success",
         duration: 3000,
       });
-      await updateStudentsList();
+      await updateRoleList();
       onCloseConfirmDelete();
-      setIsDeletingInstrument(false);
+      setIsDeletingEmployee(false);
     } catch (error) {
-      setIsDeletingInstrument(false);
+      setIsDeletingEmployee(false);
       console.log(error);
       toast({
         title: "Opa!",
@@ -108,17 +101,17 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
           gridGap={"1.25rem"}
         >
           <Flex align={"center"} justify={"space-between"}>
-            <Heading fontSize={"3rem"}>Alunos</Heading>
+            <Heading fontSize={"3rem"}>Cargos</Heading>
             <Button
               colorScheme={"complementaryApp"}
               leftIcon={<FaPlus />}
               onClick={() => {
                 setIsEdit(false);
-                setSelectedStudent(undefined);
+                setSelectedRole(undefined);
                 onOpenModal();
               }}
             >
-              Novo Aluno
+              Novo Cargo
             </Button>
           </Flex>
 
@@ -135,51 +128,41 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
               <Thead>
                 <Tr>
                   <Th isNumeric>ID</Th>
-                  <Th>Nome</Th>
-                  {/* <Th>Responsável</Th> */}
-                  <Th>Telefone</Th>
-                  <Th>CPF</Th>
+                  <Th>Título</Th>
                   <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {students.map((student) => (
+                {roles.map((role) => (
                   <Tr
-                    key={student.student_id}
+                    key={role.role_id}
                     _hover={{ backgroundColor: "blackAlpha.200" }}
                   >
-                    <Td isNumeric>{student.student_id}</Td>
-                    <Td>{student.student_name}</Td>
-                    {/* <Td>{student.student_responsible ?? "-"}</Td> */}
-                    <Td>
-                      {student.student_phone
-                        ? formatPhone(student.student_phone)
-                        : "-"}
-                    </Td>
-                    <Td>{student.student_cpf}</Td>
+                    <Td isNumeric>{role.role_id}</Td>
+                    <Td>{role.role_title}</Td>
                     <Td p={0}>
                       <Flex gridGap={"0.5rem"}>
                         <IconButton
-                          aria-label="Alterar instrumento"
+                          aria-label="Alterar cargo"
                           icon={<FaPencilAlt />}
                           size={"sm"}
                           colorScheme={"primaryApp"}
                           variant={"ghost"}
                           onClick={() => {
                             setIsEdit(true);
-                            setSelectedStudent(student);
+                            setSelectedRole(role);
                             onOpenModal();
                           }}
                         />
                         <IconButton
-                          aria-label="Excluir instrumento"
+                          aria-label="Excluir cargo"
                           icon={<FaRegTrashAlt />}
                           size={"sm"}
                           colorScheme={"danger"}
                           variant={"ghost"}
                           onClick={() => {
                             onOpenConfirmDelete();
-                            setSelectedStudent(student);
+                            setSelectedRole(role);
                           }}
                         />
                       </Flex>
@@ -191,18 +174,18 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
           </Box>
         </Flex>
       </Flex>
-      <ModalStudent
+      <ModalRole
         isOpen={isOpenModal}
         onClose={async (update: boolean = false) => {
           onCloseModal();
           if (update) {
-            await updateStudentsList();
+            await updateRoleList();
           }
         }}
         isEdit={isEdit}
-        data={selectedStudent}
+        data={selectedRole}
       />
-      {selectedStudent && (
+      {selectedRole && (
         <>
           <AlertDialog
             isOpen={isOpenConfirmDelete}
@@ -216,13 +199,13 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
                 </AlertDialogHeader>
 
                 <AlertDialogBody>
-                  Você realmente deseja excluir o aluno{" "}
+                  Você realmente deseja excluir o cargo{" "}
                   <Text as={"span"} fontWeight={"semibold"}>
-                    {selectedStudent.student_name}
+                    {selectedRole.role_title}
                   </Text>{" "}
                   de ID{" "}
                   <Text as={"span"} fontWeight={"semibold"}>
-                    {selectedStudent.student_id}
+                    {selectedRole.role_id}
                   </Text>
                   ?
                 </AlertDialogBody>
@@ -245,11 +228,11 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const students = await api.students.getAll();
+  const roles = await api.roles.getAll();
 
   return {
     props: {
-      _students: students,
+      _roles: roles,
     },
     revalidate: 60 * 60 * 24, // 24 hours
   };

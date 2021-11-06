@@ -7,6 +7,7 @@ import {
   useToast
 } from "@chakra-ui/react";
 import MenuItem from "@components/MenuItem";
+import { useAuth } from "@hooks/useAuth";
 import { useRouter } from "next/router";
 import React from "react";
 import { FaMoon, FaSun } from "react-icons/fa";
@@ -14,27 +15,28 @@ import { FaMoon, FaSun } from "react-icons/fa";
 export default function Menu() {
   const router = useRouter();
   const { colorMode, toggleColorMode } = useColorMode();
-  // const { signOut } = useAuth();
+  const { signOut } = useAuth();
   const toast = useToast();
 
   const pages = [
     { name: "Inicial", href: "/" },
+    { name: "Cargos", href: "/roles" },
     { name: "Estudantes", href: "/students" },
     { name: "Instrumentos", href: "/instruments" },
-    { name: "Eventos", href: "/events" },
+    // { name: "Eventos", href: "/events" },
     { name: "Funcionários", href: "/employees" },
     { name: "Cursos", href: "/classes" },
   ];
 
   const handleLogout = async () => {
     try {
-      // await signOut();
+      await signOut();
       toast({
         description: "Usuário deslogado com sucesso.",
         status: "success",
         isClosable: true,
-
-        position: "top",
+        title: "Eba",
+        position: "top-right",
       });
       await router.push("/login");
     } catch (error: any) {

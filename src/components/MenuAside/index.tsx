@@ -1,11 +1,13 @@
 import { useColorMode } from "@chakra-ui/color-mode";
-import { Flex, Heading } from "@chakra-ui/layout";
+import { Flex, Heading, Text } from "@chakra-ui/layout";
 import Menu from "@components/Menu";
+import { useAuth } from "@hooks/useAuth";
 import { useRouter } from "next/dist/client/router";
 
 export default function MenuAside() {
   const router = useRouter();
   const { colorMode } = useColorMode();
+  const auth = useAuth();
 
   return (
     <Flex
@@ -14,7 +16,7 @@ export default function MenuAside() {
       maxW={"18rem"}
       bg={"primaryApp.600"}
       boxShadow={"md"}
-      gridGap={"1.5rem"}
+      gridGap={"1rem"}
       position={"sticky"}
       top={"0"}
       direction={"column"}
@@ -22,7 +24,6 @@ export default function MenuAside() {
     >
       <Flex
         align={"center"}
-        fontSize={"1.3rem"}
         cursor={"pointer"}
         transition={"0.2s ease-in-out"}
         onClick={() => router.push("/")}
@@ -33,6 +34,9 @@ export default function MenuAside() {
         <Heading fontSize={"3rem"} color={"light"} margin={"0 auto"}>
           SGPG
         </Heading>
+      </Flex>
+      <Flex align={"center"} w={'100%'} justify={"center"} fontSize={'0.875rem'}>
+        <Text>Usuário: {auth.employee?.employee_name}</Text>
       </Flex>
       <Menu />
     </Flex>

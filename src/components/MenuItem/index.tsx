@@ -20,7 +20,7 @@ export default function MenuItem({
   const styles = useStyleConfig("MenuItem", { variant });
 
   return (
-    <NextLink href={href}>
+    <NextLink href={href} {...rest}>
       <Flex __css={styles} gridGap={"0.5rem"}>
         {/* {page.icon && <Icon as={page.icon} boxSize={"1.25rem"} />} */}
         <a>{name}</a>
