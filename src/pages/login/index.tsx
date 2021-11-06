@@ -11,6 +11,7 @@ import {
   useColorMode,
   useToast
 } from "@chakra-ui/react";
+import { useAuth } from "@hooks/useAuth";
 import { Field, FieldProps, Form, Formik } from "formik";
 import { useRouter } from "next/dist/client/router";
 import React from "react";
@@ -20,13 +21,14 @@ import * as yup from "yup";
 type FormFields = {
   [key: string]: any;
   email: string;
-  password?: string;
+  password: string;
 };
 
 export default function LoginPage() {
   const { colorMode, toggleColorMode } = useColorMode();
   const router = useRouter();
   const toast = useToast();
+  const auth = useAuth();
 
   const requiredMessage = "Campo obrigatório.";
   const validationSchema = yup.object().shape({
@@ -38,10 +40,6 @@ export default function LoginPage() {
     email: "",
     password: "",
   };
-
-  function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 
   return (
     <Flex grow={1} direction={"column"} p={"2rem"}>
@@ -82,10 +80,8 @@ export default function LoginPage() {
           <Formik
             initialValues={initialValues}
             onSubmit={async (values) => {
-              console.log(values);
               try {
-                await sleep(2000);
-                await router.push("/");
+                await auth.signIn(values.email, values.password);
                 toast({
                   title: "Eba!",
                   description: "Usuário logado com sucesso.",

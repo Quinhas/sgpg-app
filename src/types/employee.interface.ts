@@ -1,3 +1,5 @@
+import { Role } from "./role.interface";
+
 export interface EmployeeDTO {
   employee_name: string;
   employee_cpf: string;
@@ -16,6 +18,7 @@ export interface Employee extends EmployeeDTO {
   created_at: string;
   updated_at: string | null;
   deleted_at: string | null;
+  roles?: Role;
 }
 
 export interface EmployeeResponse extends Omit<Employee, "employee_password"> {}

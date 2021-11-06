@@ -111,17 +111,18 @@ export default function Home({ numberOf }: HomeProps) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  // const instruments = (await api.get<{ data: any[] }>("/instruments")).data;
-  const employees = await api.getAllEmployees();
-  // const classes = (await api.get<{ data: any[] }>("/classes")).data;
+  const students = await api.students.getAll();
+  const instruments = await api.instruments.getAll();
+  const employees = await api.employees.getAll();
+  const classes = await api.classes.getAll();
 
   return {
     props: {
       numberOf: {
-        students: 200,
-        instruments: 2,
+        students: students.length,
+        instruments: instruments.length,
         employees: employees.length,
-        classes: 2,
+        classes: classes.length,
       },
     },
     revalidate: 60 * 60 * 24, // 24 hours

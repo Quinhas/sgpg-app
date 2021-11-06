@@ -14,8 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
 import MenuAside from "@components/MenuAside";
-import { ModalEditEmployee } from "@components/ModalEditEmployee";
-import { ModalNewEmployee } from "@components/ModalNewEmployee";
+import { ModalEmployee } from "@components/ModalEmployee";
 import api from "@services/api";
 import { SGPGApplicationException } from "@utils/SGPGApplicationException";
 import { GetStaticProps } from "next";
@@ -30,14 +29,9 @@ interface EmployeePageProps {
 export default function EmployeesPage({ _employees }: EmployeePageProps) {
   const { colorMode } = useColorMode();
   const {
-    isOpen: isOpenNew,
-    onOpen: onOpenNew,
-    onClose: onCloseNew,
-  } = useDisclosure();
-  const {
-    isOpen: isOpenEdit,
-    onOpen: onOpenEdit,
-    onClose: onCloseEdit,
+    isOpen: isOpenModal,
+    onOpen: onOpenModal,
+    onClose: onCloseModal,
   } = useDisclosure();
   const {
     isOpen: isOpenConfirmDelete,
@@ -51,9 +45,10 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
   );
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeResponse>();
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
 
   const updateEmployeeList = async () => {
-    const _employees = await api.getAllEmployees();
+    const _employees = await api.employees.getAll();
     setEmployees(_employees);
   };
 
@@ -74,12 +69,7 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
         created_by: selectedEmployee.created_by,
         is_deleted: true,
       };
-      console.log(updatedEmployee);
-      const _employee = await api.updateEmployee(
-        selectedEmployee.employee_id,
-        updatedEmployee
-      );
-      console.log(_employee);
+      await api.employees.update(selectedEmployee.employee_id, updatedEmployee);
       toast({
         title: "Eba!",
         description: "Funcionário excluído com sucesso.",
@@ -118,11 +108,15 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
           gridGap={"1.25rem"}
         >
           <Flex align={"center"} justify={"space-between"}>
-            <Heading fontSize={"3rem"}>Funcionários 💼</Heading>
+            <Heading fontSize={"3rem"}>Funcionários</Heading>
             <Button
               colorScheme={"complementaryApp"}
               leftIcon={<FaPlus />}
-              onClick={onOpenNew}
+              onClick={() => {
+                setIsEdit(false);
+                setSelectedEmployee(undefined);
+                onOpenModal();
+              }}
             >
               Novo Funcionário
             </Button>
@@ -142,8 +136,6 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
                 <Tr>
                   <Th isNumeric>ID</Th>
                   <Th>Nome</Th>
-                  <Th>CPF</Th>
-                  <Th>E-mail</Th>
                   <Th>Telefone</Th>
                   <Th>Função</Th>
                   <Th></Th>
@@ -157,10 +149,8 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
                   >
                     <Td isNumeric>{employee.employee_id}</Td>
                     <Td>{employee.employee_name}</Td>
-                    <Td>{employee.employee_cpf}</Td>
-                    <Td>{employee.employee_email}</Td>
                     <Td>{employee.employee_phone}</Td>
-                    <Td>{employee.employee_role}</Td>
+                    <Td>{employee.roles?.role_title ?? "-"}</Td>
                     <Td p={0}>
                       <Flex gridGap={"0.5rem"}>
                         <IconButton
@@ -170,8 +160,9 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
                           colorScheme={"primaryApp"}
                           variant={"ghost"}
                           onClick={() => {
-                            onOpenEdit();
+                            setIsEdit(true);
                             setSelectedEmployee(employee);
+                            onOpenModal();
                           }}
                         />
                         <IconButton
@@ -194,12 +185,16 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
           </Box>
         </Flex>
       </Flex>
-      <ModalNewEmployee
-        isOpen={isOpenNew}
-        onClose={async () => {
-          await updateEmployeeList();
-          onCloseNew();
+      <ModalEmployee
+        isOpen={isOpenModal}
+        onClose={async (update: boolean = false) => {
+          onCloseModal();
+          if (update) {
+            await updateEmployeeList();
+          }
         }}
+        isEdit={isEdit}
+        data={selectedEmployee}
       />
       {selectedEmployee && (
         <>
@@ -237,14 +232,6 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
               </AlertDialogContent>
             </AlertDialogOverlay>
           </AlertDialog>
-          <ModalEditEmployee
-            isOpen={isOpenEdit}
-            onClose={async () => {
-              await updateEmployeeList();
-              onCloseEdit();
-            }}
-            employee={selectedEmployee}
-          />
         </>
       )}
     </>
@@ -252,7 +239,7 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const employees = await api.getAllEmployees();
+  const employees = await api.employees.getAll();
 
   return {
     props: {

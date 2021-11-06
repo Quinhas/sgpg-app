@@ -5,7 +5,7 @@ import {
   FormLabel
 } from "@chakra-ui/form-control";
 import { Input } from "@chakra-ui/input";
-import { Flex, Stack } from "@chakra-ui/layout";
+import { Flex } from "@chakra-ui/layout";
 import {
   Modal,
   ModalBody,
@@ -15,19 +15,26 @@ import {
   ModalHeader,
   ModalOverlay
 } from "@chakra-ui/modal";
-import { Radio, RadioGroup } from "@chakra-ui/radio";
+import { Select } from "@chakra-ui/select";
 import { useToast } from "@chakra-ui/toast";
+import { useAuth } from "@hooks/useAuth";
 import api from "@services/api";
+import formatCPF from "@utils/formatCPF";
+import formatPhone from "@utils/formatPhone";
+import { SGPGApplicationException } from "@utils/SGPGApplicationException";
 import { cpf } from "cpf-cnpj-validator";
 import { Field, FieldProps, Form, Formik } from "formik";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ReactInputMask from "react-input-mask";
-import { EmployeeDTO } from "src/types/employee.interface";
+import { EmployeeDTO, EmployeeResponse } from "src/types/employee.interface";
+import { Role } from "src/types/role.interface";
 import * as yup from "yup";
 
-interface ModalNewEmployeeProps {
+interface ModalEmployeeProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (update?: boolean) => void;
+  isEdit?: boolean;
+  data?: EmployeeResponse;
 }
 
 type FormFields = {
@@ -41,11 +48,17 @@ type FormFields = {
   addr: string;
   salary: number;
   role: number;
-  isDeleted: string;
 };
 
-export function ModalNewEmployee({ isOpen, onClose }: ModalNewEmployeeProps) {
+export function ModalEmployee({
+  isOpen,
+  onClose,
+  isEdit,
+  data,
+}: ModalEmployeeProps) {
   const toast = useToast();
+  const [roles, setRoles] = useState<Role[]>([]);
+  const auth = useAuth();
 
   const requiredMessage = "Campo obrigatório.";
   const validationSchema = yup.object().shape({
@@ -70,36 +83,89 @@ export function ModalNewEmployee({ isOpen, onClose }: ModalNewEmployeeProps) {
         then: yup.string().required(requiredMessage),
       })
       .oneOf([yup.ref("password"), null], "As senhas não correspondem."),
-    isDeleted: yup.string().required(requiredMessage),
     phone: yup.string().required(requiredMessage),
+    role: yup.number().required(requiredMessage),
+    salary: yup.number().required(requiredMessage),
   });
 
   const initialValues: FormFields = {
-    name: "",
-    cpf: "",
-    addr: "",
-    email: "",
-    isDeleted: "no",
-    phone: "",
-    role: -1,
-    salary: 0,
+    name: data?.employee_name ?? "",
+    cpf: data?.employee_cpf ? formatCPF(data.employee_cpf) : "",
+    addr: data?.employee_addr ?? "",
+    email: data?.employee_email ?? "",
+    phone: data?.employee_phone ? formatPhone(data.employee_phone) : "",
+    role: data?.employee_role ?? -1,
+    salary: data?.employee_salary ?? 0,
     password: "",
     confirmPassword: "",
   };
 
+  const updateRoles = async () => {
+    const _roles = await api.roles.getAll();
+    setRoles(_roles);
+  };
+
+  useEffect(() => {
+    updateRoles();
+  }, []);
+
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size={"xl"}>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        size={"xl"}
+        isCentered
+        scrollBehavior={"inside"}
+      >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Novo Funcionário</ModalHeader>
+          <ModalHeader>{isEdit ? "Editar" : "Novo"} Funcionário</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Formik
               initialValues={initialValues}
               onSubmit={async (values) => {
-                console.log(values);
                 try {
+                  if (!auth.employee) {
+                    throw new SGPGApplicationException(
+                      "Usuário não possui permissão."
+                    );
+                  }
+                  if (isEdit) {
+                    if (!data) {
+                      throw new SGPGApplicationException(
+                        "Dados do funcionário não informados."
+                      );
+                    }
+
+                    const _employee: EmployeeDTO = {
+                      employee_name: values.name,
+                      employee_email: values.email,
+                      employee_addr: values.addr,
+                      employee_cpf: values.cpf.replace(/\D/g, ""),
+                      employee_password:
+                        values.password && values.password.trim() !== ""
+                          ? values.password
+                          : values.cpf.substr(0, 4),
+                      employee_phone: values.phone.replace(/\D/g, "").trim(),
+                      employee_role: Number(values.role),
+                      employee_salary: values.salary,
+                      created_by: auth.employee.employee_id,
+                      is_deleted: false,
+                    };
+                    await api.employees.update(data.employee_id, _employee);
+                    onClose(true);
+                    toast({
+                      title: "Eba!",
+                      description: "Funcionário atualizado com sucesso.",
+                      isClosable: true,
+                      position: "top-end",
+                      status: "success",
+                      duration: 3000,
+                    });
+                    return;
+                  }
                   const _employee: EmployeeDTO = {
                     employee_name: values.name,
                     employee_email: values.email,
@@ -110,12 +176,12 @@ export function ModalNewEmployee({ isOpen, onClose }: ModalNewEmployeeProps) {
                         ? values.password
                         : values.cpf.substr(0, 4),
                     employee_phone: values.phone.replace(/\D/g, "").trim(),
-                    employee_role: 2,
+                    employee_role: Number(values.role),
                     employee_salary: values.salary,
-                    created_by: 1,
-                    is_deleted: values.isDeleted === "yes" ? true : false,
+                    created_by: auth.employee.employee_id,
+                    is_deleted: false,
                   };
-                  const employee = await api.createEmployee(_employee);
+                  await api.employees.create(_employee);
                   toast({
                     title: "Eba!",
                     description: "Funcionário criado com sucesso.",
@@ -124,9 +190,8 @@ export function ModalNewEmployee({ isOpen, onClose }: ModalNewEmployeeProps) {
                     status: "success",
                     duration: 3000,
                   });
-                  onClose();
+                  onClose(true);
                 } catch (error) {
-                  console.log(error);
                   toast({
                     title: "Opa!",
                     description:
@@ -174,6 +239,7 @@ export function ModalNewEmployee({ isOpen, onClose }: ModalNewEmployeeProps) {
                   <FormControl
                     isInvalid={errors.cpf && touched.cpf ? true : false}
                     isRequired
+                    isDisabled={isEdit}
                   >
                     <FormLabel>CPF</FormLabel>
                     <Field name="cpf">
@@ -213,6 +279,49 @@ export function ModalNewEmployee({ isOpen, onClose }: ModalNewEmployeeProps) {
                     </Field>
                     <FormErrorMessage>{errors.email}</FormErrorMessage>
                   </FormControl>
+
+                  <Flex gridGap={"0.5rem"}>
+                    <FormControl
+                      isInvalid={errors.role && touched.role ? true : false}
+                    >
+                      <FormLabel>Cargo</FormLabel>
+                      <Field name="role">
+                        {({ field }: FieldProps) => (
+                          <Select {...field}>
+                            <option value={-1} disabled hidden>
+                              Selecione
+                            </option>
+                            {roles.map((role) => {
+                              return (
+                                <option key={role.role_id} value={role.role_id}>
+                                  {role.role_title}
+                                </option>
+                              );
+                            })}
+                          </Select>
+                        )}
+                      </Field>
+                      <FormErrorMessage>{errors.role}</FormErrorMessage>
+                    </FormControl>
+
+                    <FormControl
+                      isInvalid={errors.salary && touched.salary ? true : false}
+                    >
+                      <FormLabel>Salário</FormLabel>
+                      <Field name="salary">
+                        {({ field }: FieldProps) => (
+                          <Input
+                            {...field}
+                            type="number"
+                            p={"0 1rem"}
+                            border={"1px solid"}
+                            w={"100%"}
+                          />
+                        )}
+                      </Field>
+                      <FormErrorMessage>{errors.salary}</FormErrorMessage>
+                    </FormControl>
+                  </Flex>
 
                   <Flex gridGap={"0.5rem"}>
                     <FormControl
@@ -281,42 +390,6 @@ export function ModalNewEmployee({ isOpen, onClose }: ModalNewEmployeeProps) {
                       </Field>
                       <FormErrorMessage>{errors.phone}</FormErrorMessage>
                     </FormControl>
-
-                    <Flex
-                      as={FormControl}
-                      isInvalid={
-                        errors.isDeleted && touched.isDeleted ? true : false
-                      }
-                      isRequired
-                      align={"center"}
-                      direction={"column"}
-                    >
-                      <FormLabel>Usuário Ativo</FormLabel>
-
-                      <Field name="isDeleted">
-                        {({ field }: FieldProps) => (
-                          <RadioGroup {...field}>
-                            <Stack spacing={"1rem"} direction="row">
-                              <Radio
-                                colorScheme="danger"
-                                {...field}
-                                value={"yes"}
-                              >
-                                Não
-                              </Radio>
-                              <Radio
-                                colorScheme="success"
-                                {...field}
-                                value={"no"}
-                              >
-                                Sim
-                              </Radio>
-                            </Stack>
-                          </RadioGroup>
-                        )}
-                      </Field>
-                      <FormErrorMessage>{errors.isDeleted}</FormErrorMessage>
-                    </Flex>
                   </Flex>
 
                   <Flex
@@ -326,7 +399,12 @@ export function ModalNewEmployee({ isOpen, onClose }: ModalNewEmployeeProps) {
                     py={"1rem"}
                     gridGap={"1rem"}
                   >
-                    <Button variant="ghost" onClick={onClose}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        onClose();
+                      }}
+                    >
                       Voltar
                     </Button>
                     <Button

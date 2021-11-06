@@ -1,13 +1,20 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next'
+import api from "@services/api";
+import { students } from "@utils/data";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 type Data = {
-  name: string
-}
+  data: any[];
+};
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  res.status(200).json({ name: 'John Doe' })
+  const resRoles: any[] = await Promise.all(
+    students.map(async (data) => {
+      return (await api.apiService.post("/students", data)).data;
+    })
+  );
+  res.status(200).json({ data: resRoles });
 }
