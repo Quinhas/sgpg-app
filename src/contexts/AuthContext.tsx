@@ -68,6 +68,7 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
 
       localStorage.setItem("@SGPG:user", JSON.stringify(user));
       setIsLogged(true);
+      setEmployee(user);
       await router.push("/");
       return user;
     } catch (err: any) {
