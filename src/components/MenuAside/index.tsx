@@ -35,7 +35,7 @@ export default function MenuAside() {
           SGPG
         </Heading>
       </Flex>
-      <Flex align={"center"} w={'100%'} justify={"center"} fontSize={'0.875rem'}>
+      <Flex align={"center"} w={'100%'} color={"light"} justify={"center"} fontSize={'0.875rem'}>
         <Text>Usuário: {auth.employee?.employee_name}</Text>
       </Flex>
       <Menu />
