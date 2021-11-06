@@ -31,6 +31,7 @@ export default function Menu() {
   const handleLogout = async () => {
     try {
       await signOut();
+      await router.push("/login");
       toast({
         description: "Usuário deslogado com sucesso.",
         status: "success",
@@ -38,7 +39,6 @@ export default function Menu() {
         title: "Eba",
         position: "top-right",
       });
-      await router.push("/login");
     } catch (error: any) {
       toast({
         description: error.message,

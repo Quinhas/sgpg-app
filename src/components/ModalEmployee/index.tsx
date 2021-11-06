@@ -166,15 +166,16 @@ export function ModalEmployee({
                     });
                     return;
                   }
+                  const cpf = values.cpf.replace(/\D/g, "");
                   const _employee: EmployeeDTO = {
                     employee_name: values.name,
                     employee_email: values.email,
                     employee_addr: values.addr,
-                    employee_cpf: values.cpf.replace(/\D/g, ""),
+                    employee_cpf: cpf,
                     employee_password:
                       values.password && values.password.trim() !== ""
                         ? values.password
-                        : values.cpf.substr(0, 4),
+                        : cpf.substr(0, 4),
                     employee_phone: values.phone.replace(/\D/g, "").trim(),
                     employee_role: Number(values.role),
                     employee_salary: values.salary,

@@ -8,6 +8,7 @@ import {
   Text
 } from "@chakra-ui/layout";
 import MenuAside from "@components/MenuAside";
+import { useAuth } from "@hooks/useAuth";
 import api from "@services/api";
 import checkPlural from "@utils/checkPlural";
 import { GetStaticProps } from "next";
@@ -73,12 +74,19 @@ const Card = ({ title, value, href }: CardProps) => {
 
 export default function Home({ numberOf }: HomeProps) {
   const { colorMode } = useColorMode();
+  const auth = useAuth();
 
   return (
     <Flex direction={"row"}>
       <MenuAside />
       <Flex p={"3.125rem"} grow={1} w={"100%"} direction={"column"}>
-        <Heading fontSize={"3rem"}>Olá, Usuário!</Heading>
+        <Heading fontSize={"3rem"}>
+          Olá,{" "}
+          {auth.employee?.employee_name
+            ? auth.employee?.employee_name.split(" ")[0]
+            : "Usuário"}
+          !
+        </Heading>
         <Grid
           mt={"1.5rem"}
           gridGap={"3.125rem"}
