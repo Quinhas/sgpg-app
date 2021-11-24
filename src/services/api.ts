@@ -17,10 +17,11 @@ import { Role, RoleDTO } from "src/types/role.interface";
 import { Student, StudentDTO } from "src/types/student.interface";
 
 const apiService = axios.create({
-  baseURL:
-    process.env.NODE_ENV === "production"
-      ? "https://sgpg-univem.herokuapp.com/"
-      : "http://localhost:5000/",
+  // baseURL:
+  //   process.env.NODE_ENV === "production"
+  //     ? "https://sgpg-univem.herokuapp.com/"
+  //     : "http://localhost:5000/",
+  baseURL: "https://sgpg-univem.herokuapp.com/",
 });
 
 // BEGINS EMPLOYEE SERVICE

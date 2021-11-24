@@ -15,6 +15,7 @@ import {
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
 import MenuAside from "@components/MenuAside";
 import { ModalRole } from "@components/ModalRole";
+import { useAuth } from "@hooks/useAuth";
 import api from "@services/api";
 import { SGPGApplicationException } from "@utils/SGPGApplicationException";
 import { GetStaticProps } from "next";
@@ -44,6 +45,16 @@ export default function RolesPage({ _roles }: RolesPageProps) {
   const [selectedRole, setSelectedRole] = useState<Role>();
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const { employee } = useAuth();
+  const canCreate = employee?.employee_role
+    ? [4].includes(employee.employee_role)
+    : false;
+  const canUpdate = employee?.employee_role
+    ? [4].includes(employee.employee_role)
+    : false;
+  const canDelete = employee?.employee_role
+    ? [4].includes(employee.employee_role)
+    : false;
 
   const updateRoleList = async () => {
     const _roles = await api.roles.getAll();
@@ -110,6 +121,7 @@ export default function RolesPage({ _roles }: RolesPageProps) {
                 setSelectedRole(undefined);
                 onOpenModal();
               }}
+              disabled={!canCreate}
             >
               Novo Cargo
             </Button>
@@ -153,6 +165,7 @@ export default function RolesPage({ _roles }: RolesPageProps) {
                             setSelectedRole(role);
                             onOpenModal();
                           }}
+                          disabled={!canUpdate}
                         />
                         <IconButton
                           aria-label="Excluir cargo"
@@ -164,6 +177,7 @@ export default function RolesPage({ _roles }: RolesPageProps) {
                             onOpenConfirmDelete();
                             setSelectedRole(role);
                           }}
+                          disabled={!canDelete}
                         />
                       </Flex>
                     </Td>

@@ -48,9 +48,15 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
   const [isDeletingInstrument, setIsDeletingInstrument] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const { employee } = useAuth();
-  const canCreate = employee?.employee_role === 4;
-  const canUpdate = employee?.employee_role === 4;
-  const canDelete = employee?.employee_role === 4;
+  const canCreate = employee?.employee_role
+    ? [4, 3].includes(employee.employee_role)
+    : false;
+  const canUpdate = employee?.employee_role
+    ? [4, 3].includes(employee.employee_role)
+    : false;
+  const canDelete = employee?.employee_role
+    ? [4].includes(employee.employee_role)
+    : false;
 
   const updateStudentsList = async () => {
     const _students = await api.students.getAll();

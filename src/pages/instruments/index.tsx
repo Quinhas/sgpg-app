@@ -15,6 +15,7 @@ import {
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
 import MenuAside from "@components/MenuAside";
 import { ModalInstrument } from "@components/ModalInstrument";
+import { useAuth } from "@hooks/useAuth";
 import api from "@services/api";
 import { SGPGApplicationException } from "@utils/SGPGApplicationException";
 import { GetStaticProps } from "next";
@@ -46,6 +47,16 @@ export default function InstrumentsPage({ _instruments }: InstrumentPageProps) {
   const [selectedInstrument, setSelectedInstrument] = useState<Instrument>();
   const [isDeletingInstrument, setIsDeletingInstrument] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const { employee } = useAuth();
+  const canCreate = employee?.employee_role
+    ? [4, 3].includes(employee.employee_role)
+    : false;
+  const canUpdate = employee?.employee_role
+    ? [4, 3].includes(employee.employee_role)
+    : false;
+  const canDelete = employee?.employee_role
+    ? [4].includes(employee.employee_role)
+    : false;
 
   const updateInstrumentList = async () => {
     const _instruments = await api.instruments.getAll();
@@ -117,6 +128,7 @@ export default function InstrumentsPage({ _instruments }: InstrumentPageProps) {
                 setSelectedInstrument(undefined);
                 onOpenModal();
               }}
+              disabled={!canCreate}
             >
               Novo Instrumento
             </Button>
@@ -170,6 +182,7 @@ export default function InstrumentsPage({ _instruments }: InstrumentPageProps) {
                             setSelectedInstrument(instrument);
                             onOpenModal();
                           }}
+                          disabled={!canUpdate}
                         />
                         <IconButton
                           aria-label="Excluir instrumento"
@@ -181,6 +194,7 @@ export default function InstrumentsPage({ _instruments }: InstrumentPageProps) {
                             onOpenConfirmDelete();
                             setSelectedInstrument(instrument);
                           }}
+                          disabled={!canDelete}
                         />
                       </Flex>
                     </Td>

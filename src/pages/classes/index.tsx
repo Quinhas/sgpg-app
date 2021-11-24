@@ -3,24 +3,30 @@ import { useColorMode } from "@chakra-ui/color-mode";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { Box, Flex, Heading, Text } from "@chakra-ui/layout";
 import {
-    AlertDialog,
-    AlertDialogBody,
-    AlertDialogContent,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogOverlay,
-    IconButton,
-    useToast
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  IconButton,
+  useToast
 } from "@chakra-ui/react";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
 import MenuAside from "@components/MenuAside";
 import { ModalClass } from "@components/ModalClass";
+import { ModalClassStudents } from "@components/ModalClassStudents";
 import { useAuth } from "@hooks/useAuth";
 import api from "@services/api";
 import { SGPGApplicationException } from "@utils/SGPGApplicationException";
 import { GetStaticProps } from "next";
 import React, { useState } from "react";
-import { FaPencilAlt, FaPlus, FaRegTrashAlt } from "react-icons/fa";
+import {
+  FaPencilAlt,
+  FaPlus,
+  FaRegTrashAlt,
+  FaUserGraduate
+} from "react-icons/fa";
 import { Class, ClassDTO } from "src/types/class.interface";
 
 interface ClassesPageProps {
@@ -35,6 +41,11 @@ export default function ClassesPage({ _classes }: ClassesPageProps) {
     onClose: onCloseModal,
   } = useDisclosure();
   const {
+    isOpen: isOpenModalStudents,
+    onOpen: onOpenModalStudents,
+    onClose: onCloseModalStudents,
+  } = useDisclosure();
+  const {
     isOpen: isOpenConfirmDelete,
     onOpen: onOpenConfirmDelete,
     onClose: onCloseConfirmDelete,
@@ -45,10 +56,16 @@ export default function ClassesPage({ _classes }: ClassesPageProps) {
   const [selectedClass, setSelectedClass] = useState<Class>();
   const [isDeletingClass, setIsDeletingClass] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const auth = useAuth();
-  const canCreate = auth.employee?.employee_role === 4;
-  const canUpdate = auth.employee?.employee_role === 4;
-  const canDelete = auth.employee?.employee_role === 4;
+  const { employee } = useAuth();
+  const canCreate = employee?.employee_role
+    ? [4, 3].includes(employee.employee_role)
+    : false;
+  const canUpdate = employee?.employee_role
+    ? [4, 3].includes(employee.employee_role)
+    : false;
+  const canDelete = employee?.employee_role
+    ? [4].includes(employee.employee_role)
+    : false;
 
   const updateClassList = async () => {
     const _classes = await api.classes.getAll();
@@ -151,12 +168,33 @@ export default function ClassesPage({ _classes }: ClassesPageProps) {
                   >
                     <Td isNumeric>{sgpgClass.class_id}</Td>
                     <Td>{sgpgClass.class_name}</Td>
-                    <Td>{`${sgpgClass.class_duration}min` ?? "-"}</Td>
+                    <Td>
+                      {sgpgClass.class_duration
+                        ? `${sgpgClass.class_duration}min`
+                        : "-"}
+                    </Td>
                     <Td>{sgpgClass.employees?.employee_name ?? "-"}</Td>
                     <Td p={0}>
                       <Flex gridGap={"0.5rem"}>
                         <IconButton
-                          aria-label="Alterar funcionário"
+                          aria-label="Alterar alunos da turma"
+                          icon={<FaUserGraduate />}
+                          size={"sm"}
+                          colorScheme={"primaryApp"}
+                          variant={"ghost"}
+                          onClick={() => {
+                            setIsEdit(true);
+                            setSelectedClass(sgpgClass);
+                            onOpenModalStudents();
+                          }}
+                          disabled={
+                            sgpgClass.class_teacher != employee?.employee_id
+                              ? !canUpdate
+                              : false
+                          }
+                        />
+                        <IconButton
+                          aria-label="Alterar turma"
                           icon={<FaPencilAlt />}
                           size={"sm"}
                           colorScheme={"primaryApp"}
@@ -169,7 +207,7 @@ export default function ClassesPage({ _classes }: ClassesPageProps) {
                           disabled={!canUpdate}
                         />
                         <IconButton
-                          aria-label="Excluir funcionário"
+                          aria-label="Excluir turma"
                           icon={<FaRegTrashAlt />}
                           size={"sm"}
                           colorScheme={"danger"}
@@ -198,6 +236,16 @@ export default function ClassesPage({ _classes }: ClassesPageProps) {
           }
         }}
         isEdit={isEdit}
+        data={selectedClass}
+      />
+      <ModalClassStudents
+        isOpen={isOpenModalStudents}
+        onClose={async (update: boolean = false) => {
+          onCloseModalStudents();
+          if (update) {
+            await updateClassList();
+          }
+        }}
         data={selectedClass}
       />
       {selectedClass && (

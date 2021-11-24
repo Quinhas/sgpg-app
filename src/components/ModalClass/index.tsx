@@ -1,20 +1,20 @@
 import { Button } from "@chakra-ui/button";
 import {
-    FormControl,
-    FormErrorMessage,
-    FormHelperText,
-    FormLabel
+  FormControl,
+  FormErrorMessage,
+  FormHelperText,
+  FormLabel
 } from "@chakra-ui/form-control";
 import { Input } from "@chakra-ui/input";
 import { Flex } from "@chakra-ui/layout";
 import {
-    Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalOverlay
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay
 } from "@chakra-ui/modal";
 import { Select } from "@chakra-ui/select";
 import { Textarea } from "@chakra-ui/textarea";
@@ -67,7 +67,7 @@ export function ModalClass({ isOpen, onClose, isEdit, data }: ModalClassProps) {
 
   const getTeachers = async () => {
     const _teachers = (await api.employees.getAll()).filter(
-      (employee) => employee.employee_role == 1
+      (employee) => employee.roles?.role_title == "Educador"
     );
     setTeachers(_teachers);
   };
@@ -104,9 +104,8 @@ export function ModalClass({ isOpen, onClose, isEdit, data }: ModalClassProps) {
                       class_desc: values.desc ?? null,
                       class_days: values.days ?? null,
                       class_duration: values.duration ?? null,
-                      class_teacher: values.teacher
-                        ? Number(values.teacher)
-                        : null,
+                      class_teacher:
+                        values.teacher != -1 ? Number(values.teacher) : null,
                       created_by: data.created_by,
                       is_deleted: false,
                     };
@@ -127,9 +126,8 @@ export function ModalClass({ isOpen, onClose, isEdit, data }: ModalClassProps) {
                     class_desc: values.desc ?? null,
                     class_days: values.days ?? null,
                     class_duration: values.duration ?? null,
-                    class_teacher: values.teacher
-                      ? Number(values.teacher)
-                      : null,
+                    class_teacher:
+                      values.teacher != -1 ? Number(values.teacher) : null,
                     created_by: auth.employee.employee_id,
                     is_deleted: false,
                   };
@@ -235,9 +233,7 @@ export function ModalClass({ isOpen, onClose, isEdit, data }: ModalClassProps) {
                       <Field name="teacher">
                         {({ field }: FieldProps) => (
                           <Select {...field}>
-                            <option value={-1} disabled hidden>
-                              Selecione
-                            </option>
+                            <option value={-1}>Selecione</option>
                             {teachers.map((teacher) => {
                               return (
                                 <option
