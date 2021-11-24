@@ -1,3 +1,5 @@
+import { Employee } from "./employee.interface";
+
 export interface ClassDTO {
   class_name: string;
   class_desc: string | null;
@@ -6,6 +8,7 @@ export interface ClassDTO {
   class_days: string | null;
   created_by: number;
   is_deleted: boolean | null;
+  employees?: Employee;
 }
 
 export interface Class extends ClassDTO {

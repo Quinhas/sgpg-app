@@ -151,7 +151,7 @@ export function ModalEmployee({
                       employee_phone: values.phone.replace(/\D/g, "").trim(),
                       employee_role: Number(values.role),
                       employee_salary: values.salary,
-                      created_by: auth.employee.employee_id,
+                      created_by: data.created_by,
                       is_deleted: false,
                     };
                     await api.employees.update(data.employee_id, _employee);
@@ -284,6 +284,7 @@ export function ModalEmployee({
                   <Flex gridGap={"0.5rem"}>
                     <FormControl
                       isInvalid={errors.role && touched.role ? true : false}
+                      isDisabled={auth.employee?.employee_role != 4}
                     >
                       <FormLabel>Cargo</FormLabel>
                       <Field name="role">
@@ -307,6 +308,7 @@ export function ModalEmployee({
 
                     <FormControl
                       isInvalid={errors.salary && touched.salary ? true : false}
+                      isDisabled={auth.employee?.employee_role != 4}
                     >
                       <FormLabel>Salário</FormLabel>
                       <Field name="salary">

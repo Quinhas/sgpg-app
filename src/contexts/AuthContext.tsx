@@ -1,6 +1,7 @@
 import { Flex, Spinner, Text, useColorMode } from "@chakra-ui/react";
 import api from "@services/api";
 import { SGPGApplicationException } from "@utils/SGPGApplicationException";
+import { formatDistanceToNowStrict, formatISO, parseISO } from "date-fns";
 import router from "next/router";
 import { createContext, ReactNode, useEffect, useState } from "react";
 
@@ -10,6 +11,7 @@ type User = {
   employee_email: string;
   employee_role: number;
   is_deleted: boolean;
+  updated_at: string;
 };
 
 type AuthContextType = {
@@ -34,9 +36,42 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
   useEffect(() => {
     setLoading(true);
     (async () => {
-      const storagedUser = localStorage.getItem("@SGPG:user");
-      if (storagedUser) {
-        setEmployee(JSON.parse(storagedUser));
+      const _storagedUser = localStorage.getItem("@SGPG:user");
+      if (_storagedUser) {
+        const storagedUser: User = JSON.parse(_storagedUser);
+        const distance = Number(
+          formatDistanceToNowStrict(parseISO(storagedUser.updated_at), {
+            unit: "hour",
+          }).split(" ")[0]
+        );
+        if (distance > 2) {
+          const updatedEmployee = await api.employees.getByID(
+            storagedUser.employee_id
+          );
+
+          const user: User = {
+            employee_id: updatedEmployee.employee_id,
+            employee_email: updatedEmployee.employee_email,
+            employee_name: updatedEmployee.employee_name,
+            employee_role: updatedEmployee.employee_role,
+            is_deleted: updatedEmployee.is_deleted,
+            updated_at: String(formatISO(new Date())),
+          };
+
+          setEmployee(user);
+          localStorage.setItem("@SGPG:user", JSON.stringify(user));
+        } else {
+          const user: User = {
+            employee_id: storagedUser.employee_id,
+            employee_email: storagedUser.employee_email,
+            employee_name: storagedUser.employee_name,
+            employee_role: storagedUser.employee_role,
+            is_deleted: storagedUser.is_deleted,
+            updated_at: String(formatISO(new Date())),
+          };
+          setEmployee(user);
+          localStorage.setItem("@SGPG:user", JSON.stringify(user));
+        }
         setIsLogged(true);
         setLoading(false);
         if (["/login"].includes(router.asPath)) {
@@ -64,6 +99,7 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
         employee_name: employee.employee_name,
         employee_role: employee.employee_role,
         is_deleted: employee.is_deleted,
+        updated_at: String(formatISO(new Date())),
       };
 
       localStorage.setItem("@SGPG:user", JSON.stringify(user));

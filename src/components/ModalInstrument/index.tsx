@@ -108,7 +108,7 @@ export function ModalInstrument({
                       instrument_brand: values.brand,
                       instrument_model: values.model,
                       instrument_type: values.type,
-                      created_by: auth.employee.employee_id,
+                      created_by: data.created_by,
                       is_deleted: false,
                     };
                     await api.instruments.update(

@@ -15,6 +15,7 @@ import {
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
 import MenuAside from "@components/MenuAside";
 import { ModalEmployee } from "@components/ModalEmployee";
+import { useAuth } from "@hooks/useAuth";
 import api from "@services/api";
 import { SGPGApplicationException } from "@utils/SGPGApplicationException";
 import { GetStaticProps } from "next";
@@ -46,6 +47,10 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeResponse>();
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const auth = useAuth();
+  const canCreate = auth.employee?.employee_role === 4;
+  const canUpdate = auth.employee?.employee_role === 4;
+  const canDelete = auth.employee?.employee_role === 4;
 
   const updateEmployeeList = async () => {
     const _employees = await api.employees.getAll();
@@ -117,6 +122,7 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
                 setSelectedEmployee(undefined);
                 onOpenModal();
               }}
+              disabled={!canCreate}
             >
               Novo Funcionário
             </Button>
@@ -164,6 +170,11 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
                             setSelectedEmployee(employee);
                             onOpenModal();
                           }}
+                          disabled={
+                            employee.employee_id == auth.employee?.employee_id
+                              ? false
+                              : !canUpdate
+                          }
                         />
                         <IconButton
                           aria-label="Excluir funcionário"
@@ -175,6 +186,7 @@ export default function EmployeesPage({ _employees }: EmployeePageProps) {
                             onOpenConfirmDelete();
                             setSelectedEmployee(employee);
                           }}
+                          disabled={!canDelete}
                         />
                       </Flex>
                     </Td>

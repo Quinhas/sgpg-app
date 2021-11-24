@@ -126,7 +126,7 @@ export function ModalStudent({
                       student_responsible: null,
                       student_rg: values.rg.replace(/\D/g, ""),
                       student_scholarship: null,
-                      created_by: auth.employee.employee_id,
+                      created_by: data.created_by,
                       is_deleted: false,
                     };
                     await api.students.update(data.student_id, _student);

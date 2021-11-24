@@ -76,7 +76,7 @@ export function ModalRole({ isOpen, onClose, isEdit, data }: ModalRoleProps) {
                     const _role: RoleDTO = {
                       role_title: values.title,
                       role_desc: values.desc,
-                      created_by: auth.employee.employee_id,
+                      created_by: data.created_by,
                       is_deleted: false,
                     };
                     await api.roles.update(data.role_id, _role);
