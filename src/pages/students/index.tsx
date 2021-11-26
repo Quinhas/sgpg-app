@@ -84,7 +84,7 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
       await api.students.update(selectedStudent.student_id, updatedStudent);
       toast({
         title: "Eba!",
-        description: "Instrumento excluído com sucesso.",
+        description: "Aluno excluído com sucesso.",
         isClosable: true,
         position: "top-end",
         status: "success",
@@ -169,7 +169,7 @@ export default function StudentsPage({ _students }: StudentsPageProps) {
                         ? formatPhone(student.student_phone)
                         : "-"}
                     </Td>
-                    <Td>{formatCPF(student.student_cpf)}</Td>
+                    <Td>{canUpdate ? formatCPF(student.student_cpf) : '-'}</Td>
                     <Td p={0}>
                       <Flex gridGap={"0.5rem"}>
                         <IconButton

@@ -1,3 +1,6 @@
+import { StudentDTO } from "src/types/student.interface";
+import _students from "./data.json";
+
 export const roles = [
   {
     created_by: 1,
@@ -206,56 +209,28 @@ export const responsibles = [
   },
 ];
 // Estudantes
-export const students = [
-  {
-    created_by: 1,
-    is_deleted: false,
-    student_addr: "rua dos torto, 500",
-    student_cpf: "67022498881",
-    student_email: "lucas@hotmail.com",
-    student_name: "Luscas santana",
-    student_phone: "997665050",
+const students: StudentDTO[] = [];
+
+_students.map((student) => {
+  students.push({
+    student_name: student.nome,
+    student_rg: student.rg,
+    student_cpf: student.cpf,
+    student_email: `${student.nome.split(" ")[0]}${student.cpf.substr(
+      0,
+      3
+    )}@gmail.com`,
+    student_addr: `${student.endereco}, ${student.numero}`,
+    student_phone: student.celular,
     student_responsible: null,
-    student_rg: "18237891273",
-    student_scholarship: 2,
-  },
-  {
-    created_by: 1,
+    student_scholarship: null,
     is_deleted: false,
-    student_addr: "rua dos reto, 500",
-    student_cpf: "67022498821",
-    student_email: "jose@hotmail.com",
-    student_name: "Jose Vicente",
-    student_phone: "997665220",
-    student_responsible: null,
-    student_rg: "18237891275",
-    student_scholarship: 1,
-  },
-  {
-    created_by: 1,
-    is_deleted: false,
-    student_addr: "rua dos diagonal, 500",
-    student_cpf: "67022498851",
-    student_email: "polado@hotmail.com",
-    student_name: "Matheus Polado",
-    student_phone: "997665950",
-    student_responsible: null,
-    student_rg: "18237891275",
-    student_scholarship: 3,
-  },
-  {
-    created_by: 1,
-    is_deleted: false,
-    student_addr: "rua unespiana, 500",
-    student_cpf: "67022498882",
-    student_email: "luis@hotmail.com",
-    student_name: "Luis Fernando",
-    student_phone: "997665150",
-    student_responsible: null,
-    student_rg: "18237891203",
-    student_scholarship: 4,
-  },
-];
+    created_by: 6,
+  });
+});
+
+export { students };
+
 // Marca Instrumento
 export const instrumentbrands = [
   {
