@@ -1,4 +1,5 @@
 import { Employee } from "./employee.interface";
+import { StudentOfClass } from "./soc.interface";
 
 export interface ClassDTO {
   class_name: string;
@@ -9,6 +10,7 @@ export interface ClassDTO {
   created_by: number;
   is_deleted: boolean | null;
   employees?: Employee;
+  studentsofclass?: StudentOfClass[];
 }
 
 export interface Class extends ClassDTO {

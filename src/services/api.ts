@@ -14,14 +14,15 @@ import {
   InstrumentTypeDTO
 } from "src/types/instrumenttype.interface";
 import { Role, RoleDTO } from "src/types/role.interface";
+import { SocDTO, StudentOfClass } from "src/types/soc.interface";
 import { Student, StudentDTO } from "src/types/student.interface";
 
 const apiService = axios.create({
-  // baseURL:
-  //   process.env.NODE_ENV === "production"
-  //     ? "https://sgpg-univem.herokuapp.com/"
-  //     : "http://localhost:5000/",
-  baseURL: "https://sgpg-univem.herokuapp.com/",
+  baseURL:
+    process.env.NODE_ENV === "production"
+      ? "https://sgpg-univem.herokuapp.com/"
+      : "http://localhost:5000/",
+  // baseURL: "https://sgpg-univem.herokuapp.com/",
 });
 
 // BEGINS EMPLOYEE SERVICE
@@ -1134,6 +1135,70 @@ const instrumentbrands = {
 
 // ENDS INSTRUMENT BRANDS SERVICE
 
+// BEGINS SOC SERVICE
+
+/**
+ * @param {Object} soc - SocDTO
+ * @returns {Promise} If successfull, returns the new soc.
+ * @throws {SGPGApplicationException}
+ */
+export async function createStudentOfClass(
+  soc: SocDTO
+): Promise<StudentOfClass> {
+  try {
+    const response = (
+      await apiService.post<{ message: string; records: StudentOfClass }>(
+        `/classes/${soc.class_id}`,
+        soc
+      )
+    ).data;
+    return response.records;
+  } catch (err: any) {
+    console.log(err);
+    if (err instanceof SGPGApplicationException) {
+      throw err;
+    } else {
+      const error = err as Error;
+      throw new SGPGApplicationException(error.message, error);
+    }
+  }
+}
+
+/**
+ * @param {number} classId - ID of the class.
+ * @param {number} studentId - ID of the student.
+ * @returns {Promise} If successful, returns the soc deleted. Otherwise, returns null.
+ * @throws {SGPGApplicationException}
+ */
+export async function deleteStudentOfClass(
+  classId: number,
+  studentId: number
+): Promise<StudentOfClass> {
+  try {
+    const response = (
+      await apiService.delete<{ message: string; records: StudentOfClass }>(
+        `/classes/${classId}/${studentId}`
+      )
+    ).data;
+    const soc = response.records ?? null;
+    return soc;
+  } catch (err: any) {
+    if (err instanceof SGPGApplicationException) {
+      throw err;
+    } else {
+      const error = err as Error;
+      throw new SGPGApplicationException(error.message, error);
+    }
+  }
+}
+
+const studentOfClass = {
+  create: createStudentOfClass,
+  delete: deleteStudentOfClass,
+};
+
+// ENDS ROLES SERVICE
+
 const api = {
   apiService,
   employees,
@@ -1143,6 +1208,7 @@ const api = {
   roles,
   instrumenttypes,
   instrumentbrands,
+  studentOfClass,
 };
 
 export default api;
