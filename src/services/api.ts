@@ -20,7 +20,7 @@ import { Student, StudentDTO } from "src/types/student.interface";
 const apiService = axios.create({
   baseURL:
     process.env.NODE_ENV === "production"
-      ? "https://sgpg-univem.herokuapp.com/"
+      ? "https://sgpg-api-production.up.railway.app/"
       : "http://localhost:5000/",
   // baseURL: "https://sgpg-univem.herokuapp.com/",
 });
