@@ -266,6 +266,6 @@ export const getStaticProps: GetStaticProps = async () => {
     props: {
       _students: students,
     },
-    revalidate: 60 * 60 * 24, // 24 hours
+    revalidate: 10
   };
 };

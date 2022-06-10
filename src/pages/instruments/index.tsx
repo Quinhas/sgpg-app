@@ -265,6 +265,6 @@ export const getStaticProps: GetStaticProps = async () => {
     props: {
       _instruments: instruments,
     },
-    revalidate: 60 * 60 * 24, // 24 hours
+    revalidate: 10
   };
 };

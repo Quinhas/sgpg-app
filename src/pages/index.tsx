@@ -13,7 +13,6 @@ import api from "@services/api";
 import checkPlural from "@utils/checkPlural";
 import { GetStaticProps } from "next";
 import NextLink from "next/link";
-import React from "react";
 import CountUp from "react-countup";
 
 interface CardProps {
@@ -133,6 +132,6 @@ export const getStaticProps: GetStaticProps = async () => {
         classes: classes.length,
       },
     },
-    revalidate: 60 * 60 * 24, // 24 hours
+    revalidate: 10
   };
 };

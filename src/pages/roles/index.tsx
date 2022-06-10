@@ -3,14 +3,14 @@ import { useColorMode } from "@chakra-ui/color-mode";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { Box, Flex, Heading, Text } from "@chakra-ui/layout";
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  IconButton,
-  useToast
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogContent,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogOverlay,
+    IconButton,
+    useToast
 } from "@chakra-ui/react";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
 import MenuAside from "@components/MenuAside";
@@ -248,6 +248,6 @@ export const getStaticProps: GetStaticProps = async () => {
     props: {
       _roles: roles,
     },
-    revalidate: 60 * 60 * 24, // 24 hours
+    revalidate: 10
   };
 };
